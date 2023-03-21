@@ -2,6 +2,7 @@ import socketClient, { io } from "socket.io-client";
 import store from "../../store/store";
 import * as dashboardActions from "../../store/actions/dashboardAction";
 import * as webRTCHandler from "../webRTC/webRTCHandler";
+import * as webRTCGroupCallHandler from '../webRTC/webRTCGroupCallhandler';
 const SERVER = "http://localhost:8000";
 const broadcastEventTypes = {
   ACTIVE_USERS: "ACTIVE_USERS",
@@ -40,6 +41,12 @@ export const connectWithWebSocket = () => {
   });
   socket.on("user-hanged-up", () => {
     webRTCHandler.handleUserHangUp();
+  });
+
+  // listerners relatee with group calls
+
+  socket.on('group-call-join-request', data => {
+    webRTCGroupCallHandler.connectToNewUser(data)
   })
 };
 
@@ -75,6 +82,14 @@ export const sendUserHangUp = (data) => {
   socket.emit("user-hanged-up", data);
 };
 
+export const registerGroupCall = (data) => {
+  socket.emit("group-call-register", data);
+};
+
+export const userWantsToJoinGroupCall = (data) => {
+  socket.emit("group-call-join-request", data);
+};
+
 const handleBroadcastEvents = (data) => {
   switch (data.event) {
     case broadcastEventTypes.ACTIVE_USERS:
@@ -82,6 +97,9 @@ const handleBroadcastEvents = (data) => {
         (activeUser) => activeUser.socketId !== socket.id
       );
       store.dispatch(dashboardActions.setActiveUsers(activeUsers));
+      break;
+    case broadcastEventTypes.GROUP_CALL_ROOMS:
+      store.dispatch(dashboardActions.setGroupCalls(data.groupCallRooms));
       break;
     default:
       break;

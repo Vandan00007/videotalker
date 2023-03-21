@@ -8,6 +8,8 @@ import DashboardInformation from "./components/DashboardInformation/DashboardInf
 import { connect } from "react-redux";
 import { callStates } from "../store/actions/callActions";
 import "./Dashboard.css";
+import GroupCallRoomsList from "./components/GroupCallRoomsList/GroupCallRoomsList";
+import GroupCall from "./components/GroupCall/GroupCall";
 const Dashboard = ({ username, callState }) => {
   useEffect(() => {
     webRTCHandler.getLocalStream();
@@ -19,12 +21,13 @@ const Dashboard = ({ username, callState }) => {
       <div className="dashboard_left_section">
         <div className="dashboard_content_container">
           <DirectCall />
+          <GroupCall />
           {callState !== callStates.CALL_IN_PROGRESS && (
             <DashboardInformation username={username} />
           )}
         </div>
         <div className="dashboard_rooms_container background_secondary_color">
-          rooms
+          <GroupCallRoomsList />
         </div>
       </div>
       <div className="dashboard_right_section background_secondary_color">
