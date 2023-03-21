@@ -1,6 +1,7 @@
 const express = require("express");
 const socket = require("socket.io");
-
+const { ExpressPeerServer } = require("peer");
+const groupCallHandler = require("./groupCallHandler");
 const PORT = 8000;
 
 const app = express();
@@ -9,6 +10,12 @@ const server = app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
   console.log(`http://localhost:${PORT}`);
 });
+
+const peerServer = new ExpressPeerServer(server, { debug: true });
+
+app.use("/peerjs", peerServer);
+
+groupCallHandler.createPeerServerListeners(peerServer);
 
 const io = socket(server, {
   cors: {
@@ -87,7 +94,6 @@ io.on("connection", (socket) => {
 
   socket.on("user-hanged-up", (data) => {
     console.log("handleing user shanged up");
-    io.to(data.connectedUserSocketId).emit("user-hanged-up")
-  })
-
+    io.to(data.connectedUserSocketId).emit("user-hanged-up");
+  });
 });
