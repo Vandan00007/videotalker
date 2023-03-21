@@ -13,6 +13,7 @@ import {
   switchForScreenSharingStream,
 } from "../../../utils/webRTC/webRTCHandler";
 import ConversationButton from "./ConversationButton";
+
 const styles = {
   buttonContainer: {
     display: "flex",
