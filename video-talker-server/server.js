@@ -126,6 +126,6 @@ io.on("connection", (socket) => {
       peerId: data.peerId,
       streamId: data.streamId,
     });
-    socket.join(data.roomid);
+    socket.join(data.roomId);
   });
 });
