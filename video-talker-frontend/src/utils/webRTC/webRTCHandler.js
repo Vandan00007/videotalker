@@ -19,7 +19,10 @@ const preOfferAnswers = {
 };
 
 const defaultConstraints = {
-  video: true,
+  video: {
+    width: 480,
+    height: 360,
+  },
   audio: true,
 };
 const configuration = {
@@ -244,8 +247,6 @@ const resetCallDataAfterHangUp = () => {
   const localStream = store.getState().call.localStream;
   localStream.getVideoTracks()[0].enabled = true;
   localStream.getAudioTracks()[0].enabled = true;
-
-  
 };
 
 export const resetCallData = () => {

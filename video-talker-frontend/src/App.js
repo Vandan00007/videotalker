@@ -13,7 +13,7 @@ function App () {
   useEffect(() => {
     connectWithWebSocket();
   }, []);
-
+console.log('rendering');
   return (
     <Router>
       <Switch>

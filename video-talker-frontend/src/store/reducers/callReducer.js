@@ -12,7 +12,9 @@ const initialState = {
   remoteStream: null,
   localCameraEnabled: true,
   localMicrophoneEnabled: true,
-  screenSharingActive: false
+  screenSharingActive: false,
+  groupCallActive: false,
+  groupCallStreams: [],
 };
 
 const reducer = (state = initialState, action) => {
@@ -57,20 +59,30 @@ const reducer = (state = initialState, action) => {
         ...state,
         localMicrophoneEnabled: action.enabled,
       };
-      case callActions.CALL_SET_SCREEN_SHARING_ACTIVE:
+    case callActions.CALL_SET_SCREEN_SHARING_ACTIVE:
       return {
         ...state,
         screenSharingActive: action.active,
       };
-      case callActions.CALL_RESET_CALL_DATA:
-        return {
-          ...state,
-          remoteStream: null,
-          screenSharingActive: false,
-          callerUsername: '',
-          localMicrophoneEnabled: true,
-          callingDialogVisible: false
-        };
+    case callActions.CALL_RESET_CALL_DATA:
+      return {
+        ...state,
+        remoteStream: null,
+        screenSharingActive: false,
+        callerUsername: "",
+        localMicrophoneEnabled: true,
+        callingDialogVisible: false,
+      };
+    case callActions.CALL_SET_GROUP_CALL_ACTIVE:
+      return {
+        ...state,
+        groupCallActive: action.active,
+      };
+    case callActions.CALL_SET_GROUP_CALL_STREAMS:
+      return {
+        ...state,
+        groupCallStreams: action.groupCallStreams,
+      };
     default:
       return state;
   }

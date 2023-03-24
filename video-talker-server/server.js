@@ -1,6 +1,8 @@
 const express = require("express");
 const socket = require("socket.io");
-
+const { ExpressPeerServer } = require("peer");
+const { v4: uuidv4 } = require("uuid");
+const groupCallHandler = require("./groupCallHandler");
 const PORT = 8000;
 
 const app = express();
@@ -10,6 +12,12 @@ const server = app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
 
+const peerServer = new ExpressPeerServer(server, { debug: true });
+
+app.use("/peerjs", peerServer);
+
+groupCallHandler.createPeerServerListeners(peerServer);
+
 const io = socket(server, {
   cors: {
     origin: "*",
@@ -17,6 +25,7 @@ const io = socket(server, {
   },
 });
 let peers = [];
+let groupCallRooms = [];
 const broadcastEventTypes = {
   ACTIVE_USERS: "ACTIVE_USERS",
   GROUP_CALL_ROOMS: "GROUP_CALL_ROOMS",
@@ -36,6 +45,10 @@ io.on("connection", (socket) => {
     io.sockets.emit("broadcast", {
       event: broadcastEventTypes.ACTIVE_USERS,
       activeUsers: peers,
+    });
+    io.sockets.emit("broadcast", {
+      event: broadcastEventTypes.GROUP_CALL_ROOMS,
+      groupCallRooms,
     });
   });
 
@@ -87,7 +100,32 @@ io.on("connection", (socket) => {
 
   socket.on("user-hanged-up", (data) => {
     console.log("handleing user shanged up");
-    io.to(data.connectedUserSocketId).emit("user-hanged-up")
-  })
+    io.to(data.connectedUserSocketId).emit("user-hanged-up");
+  });
 
+  // listeners related with group call
+
+  socket.on("group-call-register", (data) => {
+    const roomId = uuidv4();
+    socket.join(roomId);
+    const newGroupCallRoom = {
+      peerId: data.peerId,
+      hostName: data.username,
+      socketId: socket.id,
+      roomId: roomId,
+    };
+    groupCallRooms.push(newGroupCallRoom);
+    io.sockets.emit("broadcast", {
+      event: broadcastEventTypes.GROUP_CALL_ROOMS,
+      groupCallRooms,
+    });
+  });
+
+  socket.on("group-call-join-request", (data) => {
+    io.to(data.roomId).emit("group-call-join-request", {
+      peerId: data.peerId,
+      streamId: data.streamId,
+    });
+    socket.join(data.roomid);
+  });
 });
